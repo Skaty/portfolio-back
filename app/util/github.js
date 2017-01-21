@@ -1,37 +1,36 @@
 import got from 'got';
-import ghGot from 'gh-got';
+import gotCached from './gotCached';
 
 import log from './log';
 
 const query = {
-  'client_id': process.env.CLIENT_ID,
-  'client_secret': process.env.CLIENT_SECRET
+  client_id: process.env.CLIENT_ID,
+  client_secret: process.env.CLIENT_SECRET,
 };
 
 const headers = {
-  'Authorization': `bearer ${process.env.GRAPHQL_KEY}`
+  Authorization: `bearer ${process.env.GRAPHQL_KEY}`,
 };
 
 const beta_headers = {
-  'accept': 'application/vnd.github.cloak-preview'
+  accept: 'application/vnd.github.cloak-preview'
 };
 
 function getProperName(name) {
-  return ghGot(`users/${name}`, {query}).then(res => {
-    if ('login' in res.body) {
-      return res.body.login;
-    } else {
-      return '';
+  return gotCached(`users/${name}`, {query}).then(webpage => {
+    if ('login' in webpage) {
+      return webpage.login;
     }
-  })
+    return '';
+  });
 }
 
 function getContributedRepoList(name) {
-  let body =  JSON.stringify({
-    'query': `query { user(login:"${name}") { email location name websiteURL avatarURL bio contributedRepositories(first: 100) { edges { node { name path description isFork isPrivate homepageURL stargazers { totalCount } } } } } }`
+  const body = JSON.stringify({
+    query: `query { user(login:"${name}") { email location name websiteURL avatarURL bio contributedRepositories(first: 100) { edges { node { name path description isFork isPrivate homepageURL stargazers { totalCount } languages(first: 3, orderBy: { field: SIZE, direction: DESC }) { edges { node { name } } } } } } } }`
   });
 
-  let json = true;
+  const json = true;
 
   return got('https://api.github.com/graphql', {json, body, headers}).then(res => {
     if ('errors' in res.body) {
@@ -44,29 +43,22 @@ function getContributedRepoList(name) {
 }
 
 function extractContributionsForRepo(name, repoURL) {
-  return ghGot(`repos${repoURL}/contributors`, {query}).then(res => {
-    if (!Array.isArray(res.body)) {
+  return gotCached(`repos${repoURL}/contributors`, {query}).then((webpage) => {
+    if (!Array.isArray(webpage)) {
       // error
       return 0;
-    } else {
-      let result = res.body.filter(itm => itm.login === name);
-      if (result.length == 0) {
-        return 0;
-      } else {
-        return result[0].contributions;
-      }
     }
-  }).catch(error => {
+    const result = webpage.filter(itm => itm.login === name);
+    if (result.length === 0) {
+      return 0;
+    }
+    return result[0].contributions;
+  }).catch((error) => {
     console.log(error);
     return 0;
   });
 }
 
-function extractRepoProgrammingLanguage(repoURL) {
-  return ghGot(`repos${repoURL}/languages`, {query}).then(res => {
-    return Object.keys(res.body);
-  });
-}
 /*
 async function extractFirstAndRecentCommit(name, repoURL) {
   let repoName = repoURL.substring(1);
@@ -87,19 +79,6 @@ async function extractFirstAndRecentCommit(name, repoURL) {
   return {first, recent};
 }
 */
-function getRepoContribStats(name) {
-  return (repoURL) => {
-    let commits = extractContributionsForRepo(name, repoURL);
-    let languages = extractRepoProgrammingLanguage(repoURL);
-
-    return Promise.all([commits, languages]).then(res => {
-      return {'commits': res[0], 'langs': res[1]};
-    }).catch(error => {
-      return {'commits': 0, 'langs': []};
-    });
-  };
-}
-
 function filterIrrelevantRepo(contribution) {
   return !contribution.isFork && !contribution.isPrivate;
 }
@@ -107,13 +86,14 @@ function filterIrrelevantRepo(contribution) {
 function collectProgrammingLanguages(repos) {
   const langMap = {};
   repos.forEach((repo) => {
-    repo.langs.forEach((lang) => {
+    repo.languages.edges.forEach((edge) => {
+      const lang = edge.node.name;
       if (lang in langMap) {
-        langMap[lang]++;
+        langMap[lang] += 1;
       } else {
         langMap[lang] = 1;
       }
-    })
+    });
   });
 
   return langMap;
@@ -123,18 +103,19 @@ export default async (enteredName) => {
   try {
     const name = await getProperName(enteredName);
     const rawInfo = await getContributedRepoList(name);
-    const contribRepos = rawInfo.contributedRepositories.edges.map((item) => item.node);
-    let nonForkRepos = contribRepos.filter(filterIrrelevantRepo);
+    const contribRepos = rawInfo.contributedRepositories.edges.map(item => item.node);
+    const nonForkRepos = contribRepos.filter(filterIrrelevantRepo);
 
-    let userRepo = getRepoContribStats(name);
-    let stats = await Promise.all(nonForkRepos.map(itm => userRepo(itm.path)));
+    const contributedRepositories = [];
+    await Promise.all(nonForkRepos.map(async (repo) => {
+      repo.commits = await extractContributionsForRepo(name, repo.path);
+      if (repo.commits > 0) {
+        contributedRepositories.push(repo);
+      }
+    }));
+    const languages = collectProgrammingLanguages(contributedRepositories);
 
-    let zip = (a1, a2) => a1.map((x, i) => Object.assign(x, a2[i]));
-    let contributedRepositories = zip(stats, nonForkRepos).filter(itm => itm.commits > 0);
-
-    let languages = collectProgrammingLanguages(contributedRepositories);
-
-    return Object.assign({}, rawInfo, {contributedRepositories, languages});
+    return Object.assign({}, rawInfo, { contributedRepositories, languages });
   } catch (error) {
     console.log(error);
     return {};

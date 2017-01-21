@@ -3,7 +3,6 @@ import Koa from 'koa';
 
 import Router from 'koa-router';
 import BodyParser from 'koa-bodyparser';
-import { graphqlKoa, graphiqlKoa } from 'graphql-server-koa';
 
 import Boom from 'boom';
 import loggerMiddleware from 'koa-bunyan-logger';
@@ -11,7 +10,6 @@ import errorMiddleware from './middleware/error';
 import generate from './util/generate';
 
 import log from './util/log';
-import schema from './graphql';
 
 const app = new Koa();
 const router = new Router();
@@ -25,10 +23,7 @@ app.use(loggerMiddleware.requestLogger());
 app.use(errorMiddleware());
 
 // Registers routes
-router.post('/graphql', graphqlKoa({ schema }));
-router.get('/graphiql', graphiqlKoa({ endpointURL: '/graphql' }));
-
-router.get('/page/:id/:tid', async function (ctx, name) {
+router.get('/page/:id/:tid', async (ctx) => {
   log.info(ctx.params.tid);
   ctx.body = await generate(ctx.params.id, ctx.params.tid);
 });
