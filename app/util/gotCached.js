@@ -9,9 +9,9 @@ const log = bunyan.createLogger({ name: 'gotCached' });
 /**
  * Converts URL to equivalent valid filename.
  */
-function getCachePath(urlStr, cachePath) {
+function getCachePath(urlStr, name = '', cachePath) {
   const fileUrl = url.parse(urlStr);
-  const pathAndHash = fileUrl.path + (fileUrl.hash ? fileUrl.hash : '');
+  const pathAndHash = fileUrl.path + (fileUrl.hash ? fileUrl.hash : '') + name;
   const hostname = encodeURIComponent(fileUrl.hostname);
   const restOfPath = encodeURIComponent(pathAndHash);
   return path.join(cachePath, hostname, restOfPath);
@@ -34,7 +34,7 @@ async function getFileModifiedTime(cachedPath, urlStr) {
 }
 
 async function gotCached(urlStr, config) {
-  const cachedPath = getCachePath(urlStr, './cache');
+  const cachedPath = getCachePath(urlStr, config.name, './cache');
   log.warn(cachedPath);
   function returnCached() {
     log.info(`returning cached file for ${urlStr}`);

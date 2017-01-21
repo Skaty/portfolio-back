@@ -1,15 +1,27 @@
+import caffeine from 'jsonresume-theme-caffeine';
+import crisp from 'jsonresume-theme-crisp';
+import eloquent from 'jsonresume-theme-eloquent';
+import kate from 'jsonresume-theme-kate';
+import kendall from 'jsonresume-theme-kendall';
+import material from 'jsonresume-theme-material';
+import moon from 'jsonresume-theme-moon';
+import simplistic from 'jsonresume-theme-simplistic';
+import smart from 'jsonresume-theme-smart';
+import spartacus from 'jsonresume-theme-spartacus';
+import stackoverflow from 'jsonresume-theme-stackoverflow';
+
 const TEMPLATES_AVAILABLE = [
-  'jsonresume-theme-caffeine',
-  'jsonresume-theme-crisp',
-  'jsonresume-theme-eloquent',
-  'jsonresume-theme-kate',
-  'jsonresume-theme-kendall',
-  'jsonresume-theme-material',
-  'jsonresume-theme-moon',
-  'jsonresume-theme-simplistic',
-  'jsonresume-theme-smart',
-  'jsonresume-theme-spartacus',
-  'jsonresume-theme-stackoverflow',
+  caffeine,
+  crisp,
+  eloquent,
+  kate,
+  kendall,
+  material,
+  moon,
+  simplistic,
+  smart,
+  spartacus,
+  stackoverflow,
 ];
 
 const JSON_SCHEMA = {
@@ -52,14 +64,13 @@ const JSON_SCHEMA = {
 };
 
 export default (idx, data) => {
-  const template = require(TEMPLATES_AVAILABLE[idx]);
+  const template = TEMPLATES_AVAILABLE[idx];
 
   if (!template.render) {
     return '';
-  } else {
-    return template.render({
-      ...JSON_SCHEMA,
-      ...data,
-    });
   }
+  return template.render({
+    ...JSON_SCHEMA,
+    ...data,
+  });
 };

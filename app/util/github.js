@@ -1,4 +1,3 @@
-import got from 'got';
 import gotCached from './gotCached';
 
 import log from './log';
@@ -32,12 +31,12 @@ function getContributedRepoList(name) {
 
   const json = true;
 
-  return got('https://api.github.com/graphql', { json, body, headers }).then((res) => {
-    if ('errors' in res.body) {
+  return gotCached('https://api.github.com/graphql', { json, body, headers, name }).then((result) => {
+    if ('errors' in result) {
       return {};
     } else {
       // no error
-      return res.body.data.user;
+      return result.data.user;
     }
   });
 }
@@ -54,7 +53,7 @@ function extractContributionsForRepo(name, repoURL) {
     }
     return result[0].contributions;
   }).catch((error) => {
-    console.log(error);
+    log.error(error);
     return 0;
   });
 }
@@ -113,11 +112,12 @@ export default async (enteredName) => {
         contributedRepositories.push(repo);
       }
     }));
+    contributedRepositories.sort((a, b) => b.commits - a.commits);
     const languages = collectProgrammingLanguages(contributedRepositories);
 
     return Object.assign({}, rawInfo, { contributedRepositories, languages });
   } catch (error) {
-    console.log(error);
+    log.error(error);
     return {};
   }
 };
