@@ -42,17 +42,24 @@ const JSON_SCHEMA = {
   }],
   "skills": [{
     "name": "Web Development",
-    "level": "Master",
+    "level": "",
     "keywords": [
       "HTML",
       "CSS",
       "Javascript"
     ]
-  }],
-  "languages": [{
-    "name": "English",
-    "level": "Native speaker"
   }]
 };
 
-export default () => { throw 'Not Implemented'; };
+export default (idx, data) => {
+  let template = require(TEMPLATES_AVAILABLE[idx]);
+
+  if (!template.render) {
+    return '';
+  } else {
+    return template.render({
+      ...JSON_SCHEMA,
+      ...data
+    });
+  }
+};
