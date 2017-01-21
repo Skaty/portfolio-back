@@ -3,10 +3,10 @@ import github from './github';
 
 function formatBio(name, bio) {
   return {
-    "name": bio.name,
+    "name": bio.name || '',
     "label": "Programmer",
     "picture": bio.avatarURL,
-    "email": bio.email,
+    "email": bio.email || '',
     "website": bio.websiteURL,
     "summary": bio.bio,
     "location": {
@@ -39,7 +39,7 @@ function formatExperience(experience) {
 
 function formatProgramming(language) {
   return [{
-    "name": "Web Development",
+    "name": "",
     "level": "",
     "keywords": Object.keys(language)
   }];
