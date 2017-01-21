@@ -13,11 +13,11 @@ const headers = {
 };
 
 const beta_headers = {
-  accept: 'application/vnd.github.cloak-preview'
+  accept: 'application/vnd.github.cloak-preview',
 };
 
 function getProperName(name) {
-  return gotCached(`users/${name}`, {query}).then(webpage => {
+  return gotCached(`users/${name}`, { query }).then((webpage) => {
     if ('login' in webpage) {
       return webpage.login;
     }
@@ -27,12 +27,12 @@ function getProperName(name) {
 
 function getContributedRepoList(name) {
   const body = JSON.stringify({
-    query: `query { user(login:"${name}") { email location name websiteURL avatarURL bio contributedRepositories(first: 100) { edges { node { name path description isFork isPrivate homepageURL stargazers { totalCount } languages(first: 3, orderBy: { field: SIZE, direction: DESC }) { edges { node { name } } } } } } } }`
+    query: `query { user(login:"${name}") { email location name websiteURL avatarURL bio contributedRepositories(first: 35) { edges { node { name path description isFork isPrivate homepageURL stargazers { totalCount } languages(first: 3, orderBy: { field: SIZE, direction: DESC }) { edges { node { name } } } } } } } }`,
   });
 
   const json = true;
 
-  return got('https://api.github.com/graphql', {json, body, headers}).then(res => {
+  return got('https://api.github.com/graphql', { json, body, headers }).then((res) => {
     if ('errors' in res.body) {
       return {};
     } else {
@@ -43,7 +43,7 @@ function getContributedRepoList(name) {
 }
 
 function extractContributionsForRepo(name, repoURL) {
-  return gotCached(`repos${repoURL}/contributors`, {query}).then((webpage) => {
+  return gotCached(`repos${repoURL}/contributors`, { query }).then((webpage) => {
     if (!Array.isArray(webpage)) {
       // error
       return 0;

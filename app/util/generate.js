@@ -3,45 +3,45 @@ import github from './github';
 
 function formatBio(name, bio) {
   return {
-    "name": bio.name || '',
-    "label": "Programmer",
-    "picture": bio.avatarURL,
-    "email": bio.email || '',
-    "website": bio.websiteURL,
-    "summary": bio.bio,
-    "location": {
-      "city": bio.location
+    name: bio.name || '',
+    label: 'Programmer',
+    picture: bio.avatarURL,
+    email: bio.email || '',
+    website: bio.websiteURL,
+    summary: bio.bio,
+    location: {
+      city: bio.location,
     },
-    "profiles": [{
-      "network": "GitHub",
-      "username": name,
-      "url": `http://github.com/${name}`
-    }]
+    profiles: [{
+      network: 'GitHub',
+      username: name,
+      url: `http://github.com/${name}`,
+    }],
   };
 }
 
 function formatExperience(experience) {
-  console.log(experience.first);
-  return {
-    "organization": experience.name,
-    "position": "Contributor",
-    "website": `http://github.com${experience.path}`,
-    "startDate": '',
-    "endDate": '',
-    "summary": experience.description,
-    "highlights": [
-      `${experience.commits} commits`,
-      `${experience.stargazers.totalCount} stars`,
-      `Website: ${experience.homepageURL}`
-    ]
+  const result = {
+    organization: experience.name,
+    website: `http://github.com${experience.path}`,
+    position: 'Contributor',
+    summary: experience.description,
   };
+  result.highlights = [
+    `${experience.commits} commits`,
+    `${experience.stargazers.totalCount} stars`,
+  ];
+  if (experience.homepageURL) {
+    result.highlights.push(`Website: ${experience.homepageURL}`);
+  }
+  return result;
 }
 
 function formatProgramming(language) {
   return [{
-    "name": "",
-    "level": "",
-    "keywords": Object.keys(language)
+    name: '',
+    level: '',
+    keywords: Object.keys(language),
   }];
 }
 
@@ -52,9 +52,9 @@ export default async (name, template) => {
     return resume(template, {});
   }
 
-  let basics = formatBio(name, GITHUB_DATA);
-  let experience = GITHUB_DATA.contributedRepositories.map(exp => formatExperience(exp));
-  let skills = formatProgramming(GITHUB_DATA.languages);
+  const basics = formatBio(name, GITHUB_DATA);
+  const experience = GITHUB_DATA.contributedRepositories.map(exp => formatExperience(exp));
+  const skills = formatProgramming(GITHUB_DATA.languages);
 
-  return resume(template, {basics, 'volunteer': experience, skills})
+  return resume(template, { basics, volunteer: experience, skills });
 };

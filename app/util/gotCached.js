@@ -36,7 +36,7 @@ async function getFileModifiedTime(cachedPath, urlStr) {
 async function gotCached(urlStr, config) {
   const cachedPath = getCachePath(urlStr, './cache');
   log.warn(cachedPath);
-  async function returnCached() {
+  function returnCached() {
     log.info(`returning cached file for ${urlStr}`);
     return fs.readJson(cachedPath);
   }
@@ -57,7 +57,7 @@ async function gotCached(urlStr, config) {
   try {
     const response = await ghGot(urlStr, config);
     const body = response.body;
-    await fs.outputJson(cachedPath, body);
+    fs.outputJson(cachedPath, body);
     return body;
   } catch (error) {
     if (error.statusCode === 304) {
