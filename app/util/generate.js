@@ -21,17 +21,28 @@ function formatBio(name, bio) {
 }
 
 function formatExperience(experience) {
+  console.log(experience.first);
   return {
     "organization": experience.name,
     "position": "Contributor",
-    "website": experience.homepageURL,
-    "startDate": "2012-01-01",
-    "endDate": "2013-01-01",
+    "website": `http://github.com${experience.path}`,
+    "startDate": '',
+    "endDate": '',
     "summary": experience.description,
     "highlights": [
-      `${experience.commits} commits`
+      `${experience.commits} commits`,
+      `${experience.stargazers.totalCount} stars`,
+      `Website: ${experience.homepageURL}`
     ]
   };
+}
+
+function formatProgramming(language) {
+  return [{
+    "name": "Web Development",
+    "level": "",
+    "keywords": Object.keys(language)
+  }];
 }
 
 export default async (name, template) => {
@@ -43,6 +54,7 @@ export default async (name, template) => {
 
   let basics = formatBio(name, GITHUB_DATA);
   let experience = GITHUB_DATA.contributedRepositories.map(exp => formatExperience(exp));
+  let skills = formatProgramming(GITHUB_DATA.languages);
 
-  return resume(template, {basics, 'volunteer': experience})
+  return resume(template, {basics, 'volunteer': experience, skills})
 };
