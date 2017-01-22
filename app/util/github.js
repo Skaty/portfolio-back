@@ -34,10 +34,9 @@ function getContributedRepoList(name) {
   return gotCached('https://api.github.com/graphql', { json, body, headers, name }).then((result) => {
     if ('errors' in result) {
       return {};
-    } else {
-      // no error
-      return result.data.user;
     }
+    // no error
+    return result.data.user;
   });
 }
 

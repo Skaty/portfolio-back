@@ -26,6 +26,8 @@ function formatExperience(experience) {
     website: `http://github.com${experience.path}`,
     position: 'Contributor',
     summary: experience.description,
+    startDate: '',
+    endDate: '',
   };
   result.highlights = [
     `${experience.commits} commits`,

@@ -35,7 +35,6 @@ async function getFileModifiedTime(cachedPath, urlStr) {
 
 async function gotCached(urlStr, config) {
   const cachedPath = getCachePath(urlStr, config.name, './cache');
-  log.warn(cachedPath);
   function returnCached() {
     log.info(`returning cached file for ${urlStr}`);
     return fs.readJson(cachedPath);

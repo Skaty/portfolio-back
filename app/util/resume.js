@@ -1,25 +1,29 @@
+import ace from 'jsonresume-theme-ace';
 import caffeine from 'jsonresume-theme-caffeine';
-import crisp from 'jsonresume-theme-crisp';
 import eloquent from 'jsonresume-theme-eloquent';
+import flatOptimized from 'jsonresume-theme-flat-optimized';
+import foxyboxy from 'jsonresume-theme-foxyboxy';
 import kate from 'jsonresume-theme-kate';
 import kendall from 'jsonresume-theme-kendall';
-import material from 'jsonresume-theme-material';
-import moon from 'jsonresume-theme-moon';
+import riga from 'jsonresume-theme-riga';
 import simplistic from 'jsonresume-theme-simplistic';
-import smart from 'jsonresume-theme-smart';
 import spartacus from 'jsonresume-theme-spartacus';
 import stackoverflow from 'jsonresume-theme-stackoverflow';
 
+import bunyan from 'bunyan';
+
+const log = bunyan.createLogger({ name: 'resume' });
+
 const TEMPLATES_AVAILABLE = [
+  ace,
   caffeine,
-  crisp,
   eloquent,
+  flatOptimized,
+  foxyboxy,
   kate,
   kendall,
-  material,
-  moon,
+  riga,
   simplistic,
-  smart,
   spartacus,
   stackoverflow,
 ];
@@ -61,12 +65,15 @@ const JSON_SCHEMA = {
       'Javascript',
     ],
   }],
+  work: [],
+  education: [],
 };
 
 export default (idx, data) => {
-  const template = TEMPLATES_AVAILABLE[idx];
+  const template = TEMPLATES_AVAILABLE[idx % TEMPLATES_AVAILABLE.length];
 
   if (!template.render) {
+    log.error('Not rendering!');
     return '';
   }
   return template.render({
