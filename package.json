@@ -5,6 +5,8 @@
   "main": "app/index.js",
   "scripts": {
     "dev": "nodemon app --exec \"node --require dotenv/config --require babel-register\" | bunyan -o short",
+    "prestart": "npm run build",
+    "start": "nodemon build --exec \"node\" | bunyan -o short",
     "pretest": "yarn run lint || true",
     "test": "ava",
     "test:watch": "ava --watch",
@@ -79,5 +81,9 @@
     "require": [
       "babel-register"
     ]
+  },
+  "engines": {
+    "node": ">= 6.0.0",
+    "npm": ">= 3.0.0"
   }
 }
