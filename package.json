@@ -5,7 +5,7 @@
   "main": "app/index.js",
   "scripts": {
     "dev": "nodemon app --exec \"node --require dotenv/config --require babel-register\" | bunyan -o short",
-    "build-site": "cd website && npm install && npm run build",
+    "build-site": "cd website && npm install && npm install --only=dev && npm run build",
     "prestart": "npm run build-site && npm run build",
     "start": "nodemon build --exec \"node\" | bunyan -o short",
     "pretest": "yarn run lint || true",
