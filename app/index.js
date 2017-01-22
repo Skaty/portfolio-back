@@ -7,6 +7,7 @@ import BodyParser from 'koa-bodyparser';
 import Boom from 'boom';
 import loggerMiddleware from 'koa-bunyan-logger';
 import errorMiddleware from './middleware/error';
+import staticMiddleware from 'koa-static';
 import generate from './util/generate';
 
 import log from './util/log';
@@ -23,6 +24,9 @@ app.use(loggerMiddleware.requestLogger());
 app.use(errorMiddleware());
 
 // Registers routes
+router.get('/', staticMiddleware('website/dist'));
+router.get(/^\/static(?:\/|$)/, staticMiddleware('website/dist'));
+
 router.get('/page/:id/:tid', async (ctx) => {
   log.info(ctx.params.tid);
   ctx.body = await generate(ctx.params.id, ctx.params.tid);

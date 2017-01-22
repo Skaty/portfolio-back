@@ -5,7 +5,8 @@
   "main": "app/index.js",
   "scripts": {
     "dev": "nodemon app --exec \"node --require dotenv/config --require babel-register\" | bunyan -o short",
-    "prestart": "npm run build",
+    "build-site": "cd website && npm install && npm run build",
+    "prestart": "npm run build-site && npm run build",
     "start": "nodemon build --exec \"node\" | bunyan -o short",
     "pretest": "yarn run lint || true",
     "test": "ava",
@@ -46,6 +47,7 @@
     "koa-bunyan-logger": "^2.0.0-pre1",
     "koa-compose": "^3.1.0",
     "koa-router": "^7.0.1",
+    "koa-static": "^3.0.0",
     "nodemon": "^1.11.0"
   },
   "devDependencies": {
